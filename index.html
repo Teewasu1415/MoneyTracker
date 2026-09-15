@@ -1263,6 +1263,32 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
+        async function callBackendApi(action, data = {}) {
+  const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_NEW_DEPLOYMENT_ID/exec'; // วาง URL ใหม่ที่นี่
+
+  try {
+    const response = await fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: {
+        // ใช้ text/plain เพื่อป้องกัน CORS Preflight (OPTIONS request) ในเบราว์เซอร์
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({ action: action, data: data }),
+      redirect: 'follow' // บังคับให้ Follow Redirect ของ Google
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP Error Status: ${response.status}`);
+    }
+
+    const resData = await response.json();
+    return resData;
+  } catch (err) {
+    console.warn("GAS Web App Fetch Error:", err);
+    // หากเกิดข้อผิดพลาด ให้สลับไปใช้ Offline Storage ชั่วคราว
+    return callOfflineMock(action, data);
+  }
+}
     </script>
 </body>
 </html>
